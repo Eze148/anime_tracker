@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from anilist_api import get_current_airing_anime
-from torrent_search import search_nyaa
+from torrent_search import search_nyaa_multi
 import webbrowser
 from utils import fetch_and_resize_image
 
@@ -117,7 +117,15 @@ class AnimeTrackerGUI:
         tree.configure(yscrollcommand=scrollbar.set)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        results = search_nyaa(anime['title'], max_results=50)
+        # results = search_nyaa(anime['title'], max_results=50)
+        titles = list(set([
+            anime.get('title_romaji'),
+            anime.get('title_english'),
+            anime.get('title_native'),
+            *anime.get('synonyms', [])
+        ]))
+        results = search_nyaa_multi(titles)
+
         self.magnet_lookup = {}
 
         for idx, result in enumerate(results):

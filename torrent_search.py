@@ -29,15 +29,11 @@ def search_nyaa(anime_title, max_results=50):
             timestamp_attr = cols[4].get("data-timestamp")
             uploaded = "?"
             if timestamp_attr:
-                # uploaded = datetime.datetime.fromtimestamp(int(timestamp_attr)).strftime("%Y-%m-%d %H:%M")
-                utc_dt = datetime.datetime.fromtimestamp(int(timestamp_attr), tz=datetime.timezone.utc)
-                local_tz = datetime.timezone(datetime.timedelta(hours=7))  # UTC+7
-                local_dt = utc_dt.astimezone(local_tz)
-                uploaded = local_dt.strftime("%Y-%m-%d %H:%M")
-                
+                uploaded = datetime.datetime.fromtimestamp(int(timestamp_attr)).strftime("%Y-%m-%d %H:%M")
+
             # Seeders and Leechers
-            seeders = cols[6].text.strip()
-            leechers = cols[7].text.strip()
+            seeders = cols[5].text.strip()
+            leechers = cols[6].text.strip()
 
             if title and magnet:
                 results.append({
@@ -52,3 +48,19 @@ def search_nyaa(anime_title, max_results=50):
             print("Error parsing row:", e)
 
     return results
+
+def search_nyaa_multi(titles, max_results=50):
+    seen = set()
+    all_results = []
+
+    for title in titles:
+        if not title:
+            continue
+        results = search_nyaa(title, max_results=max_results)
+        for r in results:
+            key = r['magnet']  # Use magnet link as unique ID
+            if key not in seen:
+                seen.add(key)
+                all_results.append(r)
+
+    return all_results

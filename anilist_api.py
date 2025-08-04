@@ -12,7 +12,9 @@ def get_current_airing_anime():
           title {
             romaji
             english
+            native
           }
+          synonyms
           nextAiringEpisode {
             airingAt
             episode
@@ -51,15 +53,22 @@ def get_current_airing_anime():
 
     anime_list = []
     for anime in data['data']['Page']['media']:
-        title = anime['title']['english'] or anime['title']['romaji']
+        titles = anime['title']
+        synonyms = anime.get('synonyms', [])
         next_ep = anime.get('nextAiringEpisode')
+
         if next_ep:
             airing_utc = datetime.datetime.fromtimestamp(next_ep['airingAt'], tz=datetime.timezone.utc)
             airing_local = airing_utc.astimezone(LOCAL_TZ)
             weekday = airing_local.strftime('%A')
             time_remaining = airing_local - datetime.datetime.now().astimezone()
+
             anime_list.append({
-                "title": title,
+                "title": titles['english'] or titles['romaji'],
+                "title_romaji": titles['romaji'],
+                "title_english": titles['english'],
+                "title_native": titles['native'],
+                "synonyms": synonyms,
                 "episode": next_ep['episode'] - 1,
                 "time_remaining": str(time_remaining).split('.')[0],
                 "airing_time": airing_local.strftime('%Y-%m-%d %H:%M:%S'),
